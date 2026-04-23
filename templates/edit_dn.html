@@ -1,0 +1,121 @@
+{% extends 'side.html' %}
+{% load static %}
+{% block content %}
+{% for p in pod2 %}
+<div class="page-wrapper">
+<div class="content">
+<div class="page-header">
+<div class="page-title">
+<h4>D.N Edit</h4>
+<h6>Update your D.N</h6>
+</div>
+</div>
+<form action="{% url 'updatedn' p.id %}" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+<div class="card">
+<div class="card-body">
+<div class="row">
+<div class="col-lg-3 col-sm-6 col-12">
+<div class="form-group">
+<label>DN No</label>
+<input type="text" name="asn_no" value="{{p.dn_no}}" required>
+</div>
+</div>
+
+<div class="col-lg-3 col-sm-6 col-12">
+<div class="form-group">
+<label>Code</label>
+<input type="text" name="prod_id" value="{{p.prod_id}}" required>
+</div>
+</div>
+<div class="col-lg-3 col-sm-6 col-12">
+<div class="form-group">
+<label>Qty</label>
+<input type="text" name="qty" value="{{p.qty}}" required>
+</div>
+</div>
+<div class="col-lg-3 col-sm-6 col-12">
+<div class="form-group">
+<label>Batch</label>
+<input type="text" name="batch" value="{{p.batch}}" required>
+</div>
+</div>
+<!--
+<div class="col-lg-12">
+<div class="form-group">
+<label>Description</label>
+<textarea class="form-control"></textarea>
+</div>
+</div>
+
+<div class="col-lg-3 col-sm-6 col-12">
+<div class="form-group">
+<label>Tax</label>
+<select class="select">
+<option>Choose Tax</option>
+<option>2%</option>
+</select>
+</div>
+</div>
+<div class="col-lg-3 col-sm-6 col-12">
+<div class="form-group">
+<label>Discount Type</label>
+<select class="select">
+<option>Percentage</option>
+<option>10%</option>
+<option>20%</option>
+</select>
+</div>
+</div>
+<div class="col-lg-3 col-sm-6 col-12">
+<div class="form-group">
+<label>Price</label>
+<input type="text" value="1500.00">
+</div>
+</div>
+<div class="col-lg-3 col-sm-6 col-12">
+<div class="form-group">
+<label> Status</label>
+<select class="select">
+<option>Active</option>
+<option>Open</option>
+</select>
+</div>
+</div>
+
+
+<div class="col-12">
+<div class="product-list">
+<ul class="row">
+<li>
+<div class="productviews">
+<div class="productviewsimg">
+<img src="assets/img/icons/macbook.svg" alt="img">
+</div>
+<div class="productviewscontent">
+<div class="productviewsname">
+<h2>macbookpro.jpg</h2>
+<h3>581kb</h3>
+</div>
+<a href="javascript:void(0);" class="hideset">x</a>
+</div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+-->
+<div class="col-lg-12">
+<input type="submit" value="update" class="btn btn-submit me-2">
+<a href="productlist.html" class="btn btn-cancel">Cancel</a>
+</div>
+</div>
+</div>
+</div>
+</form>
+{% endfor %}
+</div>
+</div>
+
+{% endblock %}
+

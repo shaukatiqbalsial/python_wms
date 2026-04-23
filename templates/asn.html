@@ -1,0 +1,176 @@
+
+{% extends 'side.html' %}
+{% load static %}
+
+ 
+{% block content %}
+
+<div class="page-wrapper">
+<div class="content">
+
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold">Advance Shipping Note (A.S.N)</h3>
+        <p class="text-muted">Create inbound shipment records before stock arrives at the warehouse</p>
+    </div>
+
+    <div>
+        <form method="get" action="{% url 'export_asn_excel' %}">
+        <button type="submit" class="btn btn-outline-success">Export Excel</button>
+        </form>
+        <a href="{% url 'process_asn' %}" class="btn btn-dark">
+            ⬇ Save A.S.N
+        </a>
+    </div>
+</div>
+
+<!-- Bulk Import -->
+<div class="card mb-4" style="border:1px solid #f1c7a6; background:#fff5ee;">
+    <div class="card-body d-flex justify-content-between align-items-center">
+
+        <div>
+            <h5 class="fw-bold text-danger">Bulk Import via Excel</h5>
+            <p class="mb-0 text-muted">Upload your ASN spreadsheet to add multiple records at once</p>
+        </div>
+
+        <form action="{% url 'upload_asn' %}" method="post" enctype="multipart/form-data" class="d-flex">
+            {% csrf_token %}
+            <input type="file" name="file" class="form-control me-2" required>
+            <button type="submit" class="btn btn-warning">Import</button>
+        </form>
+
+    </div>
+</div>
+
+<!-- New Entry -->
+<div class="card mb-4">
+<div class="card-body">
+
+<h5 class="fw-bold mb-3">New Entry</h5>
+
+<form method="post" action="{% url 'asnview' %}">  
+{% csrf_token %} <div class="row g-3"> <div class="col-md-3"> <label>Customer</label> 
+<select class="form-control" id="supplier" name="supplier" required>
+     <option value="">Select Customer</option> 
+     {% for s in sup %} 
+     <option value="{{ s.id }}">{{ s.sup_name }}</option> 
+     {% endfor %} 
+     </select> 
+     </div> 
+     
+     <div class="col-md-3"> 
+     <label>SKU / Product</label> 
+     <select class="form-control" id="product" name="product" required>
+     <option value="">Select Product</option> 
+     {% for p in products %} 
+     <option value="{{ p.prod_desc }}">{{ p.prod_name }}</option> 
+     {% endfor %} </select> 
+     </div> 
+     
+     <div class="col-md-2"> <label>Batch No.</label> 
+     <input type="text" name="batch" class="form-control" placeholder="e.g B240501" required>
+     </div> 
+     
+     <div class="col-md-2"> <label>ASN No.</label> 
+     <input type="text" name="asn_no" class="form-control" placeholder="ABC123" required> 
+     </div> 
+     
+     <div class="col-md-1"> <label>Qty</label> 
+     <input type="number" name="qty" class="form-control" value="0" required> 
+     </div> 
+     <div class="col-md-1 d-flex align-items-end"> 
+     <button type="submit" class="btn btn-dark w-100">+ Add</button> 
+     </div> </div> 
+     </form>.
+
+</div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+$('#supplier').on('change', function () {
+
+    var supplier_id = $(this).val();
+
+    if (supplier_id) {
+
+        $.ajax({
+            url: "{% url 'load_products' %}",
+            data: {
+                'supplier_id': supplier_id
+            },
+            success: function (data) {
+                $('#product').html(data);
+            }
+        });
+
+    } else {
+        $('#product').html('<option value="">Select Product</option>');
+    }
+
+});
+</script>
+
+<!-- Pending ASN -->
+<div class="card">
+<div class="card-body">
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold">Pending ASN Records</h5>
+
+    <div>
+        <button class="btn btn-light btn-sm">Detail</button>
+        <button class="btn btn-light btn-sm">ASN Edit</button>
+    </div>
+</div>
+
+<div class="table-responsive">
+<table class="table table-bordered align-middle">
+
+<thead class="table-light">
+<tr>
+    <th>ASN #</th>
+    <th>Product ID</th>
+    <th>Batch</th>
+    <th>QTY</th>
+    <th>Remarks</th>
+    <th>Action</th>
+</tr>
+</thead>
+
+<tbody>
+{% for i in frm %}
+<tr>
+    <td>{{ i.asn_no }}</td>
+    <td>{{ i.prod_id }}</td>
+    <td>{{ i.batch }}</td>
+    <td>{{ i.qty }}</td>
+    <td>{{ i.remarks }}</td>
+    <td>
+        <a href="{% url 'editasn' id=i.id %}" class="btn btn-sm btn-primary">Edit</a>
+        <a href="{% url 'deletesn' id=i.id %}" 
+           onclick="return confirm('Delete?')" 
+           class="btn btn-sm btn-danger">Delete</a>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="6" class="text-center text-muted">
+        No pending records. Add an entry above to get started.
+    </td>
+</tr>
+{% endfor %}
+</tbody>
+
+</table>
+</div>
+
+</div>
+</div>
+
+</div>
+</div>
+
+{% endblock %}

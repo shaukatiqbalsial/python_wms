@@ -1,0 +1,113 @@
+
+{% extends 'side.html' %}
+{% load static %}
+{% block content %}
+
+<div class="page-wrapper">
+<div class="content">
+<div class="page-header">
+<div class="page-title">
+<h4>Supplier List</h4>
+<h6>Manage your Supplier</h6>
+</div>
+<div class="page-btn">
+<a href="{% url 'addsupplier' %} " class="btn btn-added"><img src="{% static 'img/icons/plus.svg' %}" alt="img">Add Supplier</a>
+</div>
+</div>
+
+<div class="card">
+<div class="card-body">
+<div class="table-top">
+<div class="search-set">
+<div class="search-path">
+<a class="btn btn-filter" id="filter_search">
+<img src="{% static 'img/icons/filter.svg' %}" alt="img">
+<span><img src="{% static 'img/icons/closes.svg' %}" alt="img"></span>
+</a>
+</div>
+<div class="search-input">
+<a class="btn btn-searchset"><img src="{% static 'img/icons/search-white.svg' %}" alt="img"></a>
+</div>
+</div>
+<div class="wordset">
+<ul>
+<li>
+  <a href="{% url 'supplier_print' %}" target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" title="pdf">
+    <img src="{% static 'img/icons/pdf.svg' %}" alt="PDF">
+  </a>
+</li>
+<li>
+<a data-bs-toggle="tooltip" data-bs-placement="top" title="excel"><img src="{% static 'img/icons/excel.svg' %}" alt="img"></a>
+</li>
+<li>
+<a href="{% url 'supplier_print' %}" target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" title="print"><img src="{% static 'img/icons/printer.svg' %}" alt="img"></a>
+</li>
+
+<!--<li>
+    <a href="{% url 'supplier_pdf' %}" class="btn btn-primary">Download PDF</a>
+<a href="{% url 'supplier_print' %}" target="_blank" class="btn btn-secondary">Print</a>
+</li> --> 
+
+</ul>
+</div>
+</div>
+
+
+<div class="table-responsive">
+<table class="table datanew">
+<thead>
+<tr>
+<th>
+<label class="checkboxs">
+<input type="checkbox" id="select-all">
+<span class="checkmarks"></span>
+</label>
+</th>
+<th>code</th>
+<th>Supplier Name</th>
+<th>Phone</th>
+<th>email</th>
+<th>Country</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+ {% for i in sup %}
+<tbody>
+<tr>
+<td>
+<label class="checkboxs">
+<input type="checkbox">
+<span class="checkmarks"></span>
+</label>
+</td>
+<td>{{i.id}}</td>
+<td class="productimgname">
+<a href="javascript:void(0);" class="product-img">
+<img src="{{i.sup_pic.url}}" alt="Supplier">
+</a>
+<a href="javascript:void(0);">{{i.sup_name}}</a>
+</td>
+
+<td>{{i.sup_phone}} </td>
+<td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b8ccd0d7d5d9cbf8ddc0d9d5c8d4dd96dbd7d5">{{i.sup_email}}</a></td>
+<td>{{i.sup_country}}</td>
+<td>
+<a class="me-3" href="{% url 'editsupplier' id=i.id %}">
+<img src="/static/img/icons/edit.svg" alt="img">
+</a>
+{% comment %}
+<a class="me-2 confirm-text" href="">
+<img src="/static/img/icons/delete.svg" alt="img">
+</a> 
+ {% endcomment %}
+</td>
+</tr>
+
+</tbody>
+ {% endfor %}
+
+
+
+{% endblock %}
+

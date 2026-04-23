@@ -1,0 +1,13 @@
+<body>
+
+{% if messages %}
+    {% for message in messages %}
+        <div style="background:red; color:white; padding:10px;">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+{% block content %}{% endblock %}
+
+</body>

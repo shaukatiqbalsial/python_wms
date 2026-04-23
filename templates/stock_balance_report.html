@@ -1,0 +1,19 @@
+<h2>Stock Balance Report</h2>
+<table border="1" width="100%">
+<tr>
+<th>#</th>
+<th>Product</th>
+<th>Batch</th>
+<th>Available Qty</th>
+</tr>
+
+{% for item in stock_data %}
+<tr>
+<td>{{ forloop.counter }}</td>
+<td>{{ item.product }}</td>
+<td>{{ item.batch }}</td>
+<td>{{ item.balance_qty }}</td>
+</tr>
+{% endfor %}
+
+</table>

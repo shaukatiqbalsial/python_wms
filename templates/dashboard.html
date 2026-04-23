@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Warehouse Dashboard</title>
+
+<style>
+
+body{
+font-family: Arial;
+background:#f4f6f9;
+}
+
+.container{
+width:90%;
+margin:auto;
+}
+
+.cards{
+display:flex;
+gap:20px;
+margin-top:30px;
+}
+
+.card{
+flex:1;
+padding:25px;
+color:white;
+border-radius:10px;
+font-size:20px;
+text-align:center;
+}
+
+.inbound{background:#28a745;}
+.outbound{background:#dc3545;}
+.stock{background:#007bff;}
+.alert{background:#ffc107;color:black;}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Warehouse Management Dashboard</h2>
+
+<div class="cards">
+
+<div class="card inbound">
+📦 Inbound Today
+<h1>{{ inbound_today }}</h1>
+</div>
+
+<div class="card outbound">
+🚚 Outbound Today
+<h1>{{ outbound_today }}</h1>
+</div>
+
+<div class="card stock">
+📊 Current Stock
+<h1>{{ current_stock }}</h1>
+</div>
+
+<div class="card alert">
+⚠ Low Stock Alerts
+<h1>{{ low_stock }}</h1>
+</div>
+
+</div>
+
+</div>
+
+</body>
+</html>

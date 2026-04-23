@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Messages</title>
+</head>
+<body>
+
+<h1>Test Django Messages</h1>
+
+<!-- Display messages -->
+{% if messages %}
+    {% for message in messages %}
+        <div style="padding:10px; margin:5px 0; 
+                    color:white; 
+                    {% if message.tags == 'error' %} background:red; {% else %} background:green; {% endif %}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Trigger Messages</button>
+</form>
+
+</body>
+</html>

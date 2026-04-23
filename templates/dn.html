@@ -1,0 +1,208 @@
+{% extends 'side.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+/* Page background */
+.content {
+    background: #f9fafb;
+    padding: 20px;
+}
+
+/* Card hover */
+.card-hover {
+    transition: 0.2s ease;
+    border-radius: 12px;
+}
+.card-hover:hover {
+    transform: translateY(-3px);
+}
+
+/* Gradient cards */
+.card-pending {
+    background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+}
+.card-units {
+    background: linear-gradient(135deg, #fff7ed, #ffedd5);
+}
+.card-branch {
+    background: linear-gradient(135deg, #ecfeff, #cffafe);
+}
+
+/* Stats text */
+.stat-title {
+    font-size: 14px;
+    color: #6b7280;
+}
+.stat-value {
+    font-size: 28px;
+    font-weight: 700;
+}
+.stat-sub {
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+/* Table */
+.table th {
+    font-weight: 600;
+}
+</style>
+
+<div class="page-wrapper">
+<div class="content">
+
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold">Customer Delivery Order</h3>
+        <p class="text-muted mb-0">Review pending outbound lines, then confirm & save</p>
+    </div>
+
+    <div>
+        <a href="{% url 'process_dn' %}" class="btn btn-dark">
+            ✔ Save Transfer Note
+        </a>
+    </div>
+</div>
+
+<!-- Messages -->
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+      {{ message }}
+    </div>
+  {% endfor %}
+{% endif %}
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+
+    <div class="col-md-4">
+        <div class="card card-hover card-pending border-0 shadow-sm p-3">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="stat-title">Pending Lines</div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-sub">Awaiting confirmation</div>
+                </div>
+                <div class="fs-3">📦</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card card-hover card-units border-0 shadow-sm p-3">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="stat-title">Total Units</div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-sub">Across all lines</div>
+                </div>
+                <div class="fs-3">➡️</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card card-hover card-branch border-0 shadow-sm p-3">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="stat-title">Branch</div>
+                    <div class="stat-value">2</div>
+                    <div class="stat-sub">Active session</div>
+                </div>
+                <div class="fs-3">🏢</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Import Section -->
+<div class="card border-0 shadow-sm mb-4 p-3" style="background:#fff7f3;">
+    <div class="d-flex justify-content-between align-items-center">
+
+        <div>
+            <h6 class="fw-bold mb-1">Import D.C File</h6>
+            <small class="text-muted">Upload an Excel file to bulk-import delivery order lines</small>
+        </div>
+
+        <form action="{% url 'upload_dn' %}" method="post" enctype="multipart/form-data" class="d-flex">
+            {% csrf_token %}
+            <input type="file" name="file" class="form-control me-2" required>
+            <button type="submit" class="btn btn-warning">Import</button>
+        </form>
+
+    </div>
+</div>
+
+<!-- Search + Export -->
+<div class="d-flex justify-content-between mb-3">
+
+    <input type="text" class="form-control w-50" placeholder="Search D.C no, product, distributor...">
+
+    <form method="get" action="{% url 'export_dn_excel' %}">
+        <button type="submit" class="btn btn-outline-success">Export Excel</button>
+    </form>
+
+</div>
+
+<!-- Table -->
+<div class="card border-0 shadow-sm">
+<div class="card-body">
+
+<h5 class="mb-3">Outbound Lines</h5>
+
+<div class="table-responsive">
+<table class="table align-middle">
+<thead class="table-light">
+<tr>
+<th><input type="checkbox"></th>
+<th>D.N No.</th>
+<th>Code</th>
+<th>Batch</th>
+<th>Qty</th>
+<th>Comments</th>
+<th class="text-end">Action</th>
+</tr>
+</thead>
+
+<tbody>
+{% for i in frm %}
+<tr>
+<td><input type="checkbox"></td>
+<td>{{ i.dn_no }}</td>
+<td>{{ i.prod_id }}</td>
+<td>{{ i.batch }}</td>
+<td>{{ i.qty }}</td>
+<td>{{ i.remarks }}</td>
+
+<td class="text-end">
+    <a href="{% url 'editdn' id=i.id %}" class="btn btn-sm btn-outline-primary">Edit</a>
+    <a href="{% url 'deletedn' id=i.id %}"
+       onclick="return confirm('Delete this record?');"
+       class="btn btn-sm btn-outline-danger">Delete</a>
+</td>
+</tr>
+{% empty %}
+<tr>
+<td colspan="7" class="text-center text-muted py-5">
+    No pending outbound lines<br>
+    <small>Upload a D.C file or add lines to begin</small>
+</td>
+</tr>
+{% endfor %}
+</tbody>
+
+</table>
+</div>
+
+</div>
+</div>
+
+</div>
+</div>
+
+{% endblock %}

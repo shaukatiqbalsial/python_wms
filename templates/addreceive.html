@@ -1,0 +1,216 @@
+{% extends 'side.html' %}
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+<style>
+
+/* ===== Layout ===== */
+.page-wrapper {
+    padding: 20px;
+    background: #f9fafb;
+}
+
+/* ===== Header ===== */
+.page-title {
+    margin-bottom: 20px;
+}
+.page-title h2 {
+    margin: 0;
+}
+.page-title small {
+    color: #6b7280;
+}
+
+/* ===== Summary Cards ===== */
+.summary-cards {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.summary-card {
+    flex: 1;
+    min-width: 220px;
+    border-radius: 14px;
+    padding: 18px;
+    color: #fff;
+    transition: 0.2s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.summary-card:hover {
+    transform: translateY(-3px);
+}
+
+/* Gradient colors */
+.card-1 {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+}
+.card-2 {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+.card-3 {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+.card-4 {
+    background: linear-gradient(135deg, #ec4899, #be185d);
+}
+
+/* Card text */
+.summary-card h4 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+}
+.summary-card p {
+    margin: 0;
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+/* ===== Table ===== */
+.table-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.table-modern {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table-modern th {
+    text-align: left;
+    font-size: 12px;
+    color: #6b7280;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.table-modern td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #f1f1f1;
+    font-size: 14px;
+}
+
+/* ===== Status ===== */
+.status-badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    background: #fef3c7;
+    color: #92400e;
+    font-size: 12px;
+}
+
+/* ===== Button ===== */
+.btn-submit-sm {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    font-size: 12px;
+    cursor: pointer;
+}
+.btn-submit-sm:hover {
+    opacity: 0.9;
+}
+
+</style>
+
+<div class="page-wrapper">
+
+    <!-- Header -->
+    <div class="page-title">
+        <h2>Receipt</h2>
+        <small>Click a document to begin the receiving process</small>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+
+        <div class="summary-card card-1">
+            <h4>{{ frm|length }}</h4>
+            <p>Pending Receipts</p>
+        </div>
+
+        <div class="summary-card card-2">
+            <h4>{{ total_qty|default:"0" }}</h4>
+            <p>Total ASN Qty</p>
+        </div>
+
+        <div class="summary-card card-3">
+            <h4>{{ unique_customers|default:"0" }}</h4>
+            <p>Unique Customers</p>
+        </div>
+
+        <div class="summary-card card-4">
+            <h4>-</h4>
+            <p>Active Batch</p>
+        </div>
+
+    </div>
+
+    <!-- Table -->
+    <div class="table-card">
+        <table class="table-modern">
+
+            <thead>
+                <tr>
+                    <th>DOCUMENT NO.</th>
+                    <th>GATE PASS</th>
+                    <th>Total QTY</th>
+                    <th>Received</th>
+                    <th>Remaining</th>
+                    <th>VEHICLE</th>
+                    <th>STATUS</th>
+                    <th>ACTION</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for i in frm %}
+                <tr>
+                    <td><strong>{{ i.rec_asnno }}</strong></td>
+                    <td>{{ i.gt_pass }}</td>
+                    <td>{{ i.total_asn_qty }}</td>
+                    <td>{{ i.total_rec_qty }}</td>
+                    <td>{{ i.blc}}</td>
+                    <td>{{ i.truck_no }}</td>
+
+                    <td>
+                        <span class="status-badge">Pending</span>
+                    </td>
+
+                    <td>
+                        <form action="{% url 'receivelist' i.rec_asnno %}" method="post" style="margin:0;">
+                            {% csrf_token %}
+                            <input type="hidden" name="asn" value="{{ i.rec_asnno }}">
+
+                            <button type="submit" class="btn-submit-sm">
+                                Receive
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align:center; padding:40px;">
+                        No pending receipts
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

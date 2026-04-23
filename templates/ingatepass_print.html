@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Gatepass | {{ pod.id }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: Arial; font-size:12px; margin:1rem; }
+        table { width:100%; border-collapse: collapse; margin-bottom:1rem; }
+        table, th, td { border:1px solid black; padding:4px; }
+        th { background-color:#f0f0f0; }
+        .header-table td { border:none; text-align:center; vertical-align:middle; }
+        .info-table td { border:none; padding:2px; }
+        .right { text-align:right; }
+        h4 { margin:0.5rem 0; }
+        @media print { @page{margin:0.5cm;} body{margin:0.5cm;} }
+    </style>
+</head>
+<body onload="window.print()">
+
+    <!-- Header -->
+    <table class="header-table">
+        <tr>
+            <td width="100"><img src="" width="100"></td>
+            <td>
+                <strong>Sovereign Warehousing and Distribution</strong><br>
+                <strong>Branch: {{ pod.branch_name }}</strong><br>
+                (SWD/WH/DS/023/QF-03)
+            </td>
+        </tr>
+    </table>
+
+    <hr>
+
+    <!-- Gatepass Info -->
+    <table class="info-table">
+        <tr>
+            <td><b>Gatepass #: </b>{{ pod.id }}</td>
+            <td><b>Bilty #: </b>{{ pod.bilty }}</td>
+            <td><b>Seal #: </b>{{ pod.seal }}</td>
+        </tr>
+        <tr>
+            <td><b>Vehicle #: </b>{{ pod.vehicle }}</td>
+            <td><b>Driver: </b>{{ pod.driver }}</td>
+            <td><b>CNIC: </b>{{ pod.cnic }}</td>
+        </tr>
+        <tr>
+            <td><b>Mobile #: </b>{{ pod.mobile }}</td>
+            <td><b>Vehicle Temp: </b>{{ pod.veh_temp }}</td>
+            <td><b>Product Temp: </b>{{ pod.item_temp }}</td>
+        </tr>
+        <tr>
+            <td><b>Outward Date: </b>{{ pod.outdate|date:"d/m/Y H:i" }}</td>
+            <td colspan="2"></td>
+        </tr>
+    </table>
+
+
+{% for dealer, data in distributor_group.items %}
+
+<h4>Supplier / Distributor: {{ dealer }}</h4>
+
+<table border="1" width="100%">
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Batch</th>
+<th>Qty</th>
+<th>Return / Damage</th>
+<th>Actual In</th>
+</tr>
+
+{% for i in data.items %}
+<tr>
+<td>{{ forloop.counter }}</td>
+<td>{{ i.prod_name }}</td>
+<td align="right">{{ i.batch }}</td>
+<td align="right">{{ i.qty }}</td>
+<td align="right">{{ i.cond_qty }}</td>
+<td align="right">{{ i.actual_in }}</td>
+</tr>
+{% endfor %}
+
+<tr>
+<td colspan="5" align="right"><b>Total - {{ dealer }}</b></td>
+<td align="right"><b>{{ data.total }}</b></td> 
+</tr>
+</table>
+
+{% endfor %}
+
+<h3 align="right">Grand Total : {{ grand_total }}</h3> 
+
+ <!-- Signatures -->
+    <br><br>
+    <div>
+        <strong>Driver Sign:</strong> ____________________ &nbsp;&nbsp;&nbsp;&nbsp;
+        <strong>Authorized:</strong> ____________________ &nbsp;&nbsp;&nbsp;&nbsp;
+        <strong>Supervisor:</strong> ____________________
+    </div>
+
+</body>
+</html>

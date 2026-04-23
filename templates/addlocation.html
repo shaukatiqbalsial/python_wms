@@ -1,0 +1,302 @@
+{% extends 'side.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+
+/* ===== Layout ===== */
+.page-wrapper {
+    padding: 20px;
+    background: #f9fafb;
+}
+
+/* ===== Header ===== */
+.page-title small {
+    color: #6b7280;
+}
+
+/* ===== Summary Cards ===== */
+.summary-cards {
+    display: flex;
+    gap: 15px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
+.summary-card {
+    flex: 1;
+    min-width: 200px;
+    padding: 18px;
+    border-radius: 14px;
+    color: #fff;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.summary-card:hover {
+    transform: translateY(-3px);
+}
+
+/* Gradient colors */
+.card-1 { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+.card-2 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.card-3 { background: linear-gradient(135deg, #10b981, #059669); }
+.card-4 { background: linear-gradient(135deg, #ef4444, #dc2626); }
+
+/* ===== Progress Section ===== */
+.progress-card {
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 14px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.progress-bar {
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 10px;
+}
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #f97316, #ea580c);
+    border-radius: 10px;
+}
+
+/* ===== Controls ===== */
+.top-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.search-box {
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    width: 300px;
+}
+
+.toggle-group button {
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: #f1f5f9;
+}
+
+.toggle-group .active {
+    background: #0f172a;
+    color: #fff;
+}
+
+/* ===== ASN Cards ===== */
+.asn-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 15px;
+    width: 380px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: 0.2s;
+}
+
+.asn-card:hover {
+    transform: translateY(-4px);
+}
+
+/* Header */
+.asn-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Avatar */
+.avatar {
+    width: 42px;
+    height: 42px;
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    color: #1e40af;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+/* Badge */
+.badge {
+    background: #dcfce7;
+    color: #166534;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+/* Info */
+.info {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #4b5563;
+}
+.info div { margin-bottom: 5px; }
+
+/* Stats */
+.stats {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.stat-box {
+    flex: 1;
+    background: #f3f4f6;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 12px;
+}
+
+.stat-box strong {
+    display: block;
+    font-size: 16px;
+}
+
+/* Footer */
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+/* Button */
+.btn-assign {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+}
+
+.btn-assign:hover {
+    opacity: 0.9;
+}
+
+</style>
+
+<div class="page-wrapper">
+
+    <!-- Header -->
+    <div class="page-title">
+        <h2>Location Assignment</h2>
+        <small>Select a document to begin assigning warehouse locations</small>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary-cards">
+
+        <div class="summary-card card-1">
+            <strong>{{ frm|length }}</strong><br>Pending
+        </div>
+
+        <div class="summary-card card-2">
+            <strong>{{ total_qty }}</strong><br>Total
+        </div>
+
+        <div class="summary-card card-3">
+            <strong>{{ located_qty }}</strong><br>Located
+        </div>
+
+        <div class="summary-card card-4">
+            <strong>{{ remaining_qty }}</strong><br>Remaining
+        </div>
+
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-card">
+        <strong>Overall putaway progress</strong>
+        <div class="progress-bar" style="margin-top:10px;">
+            <div class="progress-fill" style="width: {{ progress }}%;"></div>
+        </div>
+        <small>{{ progress }}%</small>
+    </div>
+
+    <!-- Controls -->
+    <div class="top-controls">
+        <input type="text" placeholder="Search document, customer..." class="search-box">
+
+        <div class="toggle-group">
+            <button class="active">Cards</button>
+            <button>List</button>
+        </div>
+    </div>
+
+    <!-- Cards -->
+    <div style="display:flex; gap:20px; flex-wrap:wrap;">
+
+        {% for i in frm %}
+        <div class="asn-card">
+
+            <div class="asn-header">
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <div class="avatar">
+                        {{ i.customer_name|slice:":2"|upper }}
+                    </div>
+                    <div>
+                        <strong>{{ i.rec_asnno }}</strong><br>
+                        <small>{{ i.customer_name }}</small>
+                    </div>
+                </div>
+
+                <span class="badge">In Progress</span>
+            </div>
+
+            <div class="info">
+                <div>🚚 Vehicle: {{ i.truck_no }}</div>
+                <div>📄 Gate Pass: {{ i.gt }}</div>
+                <div>📅 Date: {{ i.rc_dt }}</div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-box">
+                    <strong>{{ i.total_qty }}</strong> TOTAL
+                </div>
+                <div class="stat-box">
+                    <strong style="color:green;">{{ i.total_located }}</strong> LOCATED
+                </div>
+                <div class="stat-box">
+                    <strong style="color:red;">{{ i.remaining }}</strong> REMAINING
+                </div>
+                <div class="stat-box">
+                    <strong>1</strong> LINES
+                </div>
+            </div>
+
+            <div style="margin-top:10px;">
+                <small>Location progress</small>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ i.progress }}%;"></div>
+                </div>
+                <small style="float:right;">{{ i.progress }}%</small>
+            </div>
+
+            <div class="card-footer">
+                <small>Lines: 1</small>
+
+                <form action="{% url 'locationlist' i.rec_asnno %}" method="post">
+                    {% csrf_token %}
+                    <button class="btn-assign">
+                        → Assign Locations
+                    </button>
+                </form>
+            </div>
+
+        </div>
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}

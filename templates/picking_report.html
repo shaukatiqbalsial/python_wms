@@ -1,0 +1,119 @@
+
+{% extends 'side.html' %}
+{% load static %}
+
+
+
+{% block content %}
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+      {{ message }}
+    </div>
+  {% endfor %}
+{% endif %}
+
+<div class="page-wrapper">
+<div class="content">
+<div class="page-header">
+<div class="page-title">
+<h4>Picking Upload</h4>
+<h6>Manage your Picking</h6>
+<div class="page-btn">
+</div>
+</div>
+
+</div>
+
+
+
+<div class="card">
+<div class="card-body">
+<div class="table-top">
+<div class="search-set">
+<div class="search-path">
+<a class="btn btn-filter" id="filter_search">
+<img src="{% static 'img/icons/filter.svg' %}" alt="img">
+<span><img src="{% static 'img/icons/closes.svg' %}" alt="img"></span>
+</a>
+</div>
+<div class="search-input">
+<a class="btn btn-searchset"><img src="{% static 'img/icons/search-white.svg' %}" alt="img"></a>
+</div>
+</div>
+<div class="wordset">
+<ul>
+<li>
+  <a href="{% url 'supplier_print' %}" target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" title="pdf">
+    <img src="{% static 'img/icons/pdf.svg' %}" alt="PDF">
+  </a>
+</li>
+<li>
+<a data-bs-toggle="tooltip" data-bs-placement="top" title="excel"><img src="{% static 'img/icons/excel.svg' %}" alt="img"></a>
+</li>
+<li>
+<a href="{% url 'supplier_print' %}" target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" title="print"><img src="{% static 'img/icons/printer.svg' %}" alt="img"></a>
+</li>
+
+<!--<li>
+    <a href="{% url 'supplier_pdf' %}" class="btn btn-primary">Download PDF</a>
+<a href="{% url 'supplier_print' %}" target="_blank" class="btn btn-secondary">Print</a>
+</li> --> 
+
+</ul>
+</div>
+</div>
+
+
+<div class="table-responsive">
+<table class="table datanew">
+<thead>
+<tr>
+<th>S.No</th>
+<th>ID</th>
+<th>Name</th>
+<th>Batch</th>
+<th>QTY</th>
+<th>Location</th>
+<th>Action</th>
+</tr>
+</thead>
+
+
+<tbody>
+ {% for i in report %}
+
+<tr>
+<td>{{ forloop.counter }}</td>
+<td>{{i.prod_id}}</td>
+<td>{{i.prod_name}}</td>
+
+<td>{{i.batch_id}}</td>
+<td>{{i.picked_qty}}</td>
+<td>{{i.location_name}} </td>
+<td>
+{% if i.picked_confirm_date %}
+    <button class="btn btn-secondary btn-sm" disabled>
+        Completed
+    </button>
+{% else %}
+    <a href="{% url 'confirm_pick' id=i.id %}">
+        <button class="btn btn-success btn-sm">
+            Picked
+        </button>
+    </a>
+{% endif %}
+</td>
+</tr>
+
+
+</tbody>
+ {% endfor %}
+</table>
+
+</div>
+ 
+
+{% endblock %}
+
+
