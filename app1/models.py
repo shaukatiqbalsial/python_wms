@@ -63,6 +63,7 @@ class asn_form(models.Model):
     user_id=models.CharField(max_length=5)
     veh=models.CharField(max_length=30)
     trns=models.CharField(max_length=50)
+    ctn=models.CharField(max_length=10, default=0)
     
     def __str__(self):
      return self.asn_no
@@ -81,7 +82,9 @@ class asn(models.Model):
     asn_no=models.CharField(max_length=30)
     veh=models.CharField(max_length=20, default='0')
     trns=models.CharField(max_length=30, default='0')
+    ctn=models.CharField(max_length=10, default=0)
     remarks=models.CharField(max_length=100, default='')
+    
     def __str__(self):
      return self.asn_no
 
@@ -168,10 +171,16 @@ class Location(models.Model):
     stockin = models.ForeignKey('stockin', on_delete=models.CASCADE, related_name='locations')
     prod_id = models.CharField(max_length=50, null=True, blank=True)
     batch_id = models.CharField(max_length=50, null=True, blank=True)
+    sup_id = models.IntegerField(null=True, blank=True)
     
     blc = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))  # Balance quantity
     block_stock = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))  # Quantity blocked/reserved
     expire_stock = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))  # Quantity expired
+    
+    volume = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))  # Volume
+    uom = models.CharField(max_length=100, null=True, blank=True)  # e.g., Pack
+    branch = models.IntegerField(null=True, blank=True) # e.g., Pack
+    
     
     location_name = models.CharField(max_length=100)  # e.g., A1, Rack 3
     dat = models.DateField(auto_now_add=True)  # Date of placing in location

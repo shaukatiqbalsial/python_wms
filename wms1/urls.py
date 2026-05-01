@@ -58,11 +58,16 @@ urlpatterns = [
     path('load-products/', views.load_products, name='load_products'),
     path('side/',views.side, name="side"),
     
-#Barcode
+# Barcode
     path('barcodelist/',views.barcodelist, name="barcodelist"),
     path('addbarcode/',views.addbarcode, name="addbarcode"),
     path('barcodeadd/',views.BarcodeAdd, name="barcodeadd"),
+
+# Stock
+    path('addstock/',views.addstock, name="addstock"),
+    path('uploadstock',views.upload_excelstock,name='uploadstock'),
     
+     
 # ASN
    path('asn/',views.asn_load, name="asn_load"),
    path('export-asn-excel',views.export_asn_excel, name='export_asn_excel'),
@@ -120,6 +125,8 @@ path('updatelocation/<int:id>/',views.UpdateLocation, name='updatelocation'),
 # Reports
     path('stock_balance_report/',views.stock_balance_report, name="stock_balance_report"), 
     path('test-messages/', views.test_messages, name='test_messages'), 
+    
+    path('index-stock/', views.index_stock, name='index_stock'),
    
 ]
 

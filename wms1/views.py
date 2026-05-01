@@ -408,7 +408,69 @@ def BarcodeAdd(request):
     return redirect('barcodelist')
 
 
+#  Stock
+@login_required
+def addstock(request):
+    
+    return render(request, 'addstock.html')
+def parse_date(value):
+    if pd.isna(value):
+        return None
+    if isinstance(value, pd.Timestamp):
+        return value.date()
+    return value  # already correct
 
+import pandas as pd
+from datetime import datetime
+
+def clean_date(value):
+    if pd.isna(value):
+        return None
+    if isinstance(value, pd.Timestamp):
+        return value.date()
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, str):
+        return value  # already fine
+    return None  # fallback
+    
+from django.db import connection
+
+@login_required
+def upload_excelstock(request):
+    if request.method == "POST":
+        Location.objects.all().delete()
+
+        # ✅ Reset ID to 1
+        with connection.cursor() as cursor:
+            cursor.execute("ALTER TABLE app1_location AUTO_INCREMENT = 1")
+
+        form = ExcelUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            df = pd.read_excel(request.FILES['file'])
+
+            for _, row in df.iterrows():
+                Location.objects.create(
+                    prod_id=row['prod_id'],
+                    batch_id=row['batch_id'],
+                    stockin_id=row['stockin_id'],
+                    volume=row['volume'],
+                    uom=row['uom'],
+                    sup_id=row['sup_id'],
+                    mfg_dat=clean_date(row.get('mfg_dat')),
+                    expiry_dat=clean_date(row.get('expiry_dat')),
+                    block_stock=0.00,
+                    expire_stock=0.00,
+                    blc=row['blc'],
+                    location_name=row['location_name'],
+                    branch=1,
+                )
+
+    else:
+        form = ExcelUploadForm()
+
+    return render(request, 'addstock.html', {'form': form})
+     
 @login_required   
 def supplierlist(request):
     sup = supplier.objects.all()
@@ -563,10 +625,11 @@ def upload_asn(request):
                         asn_no=asn_no,
                         prod_id=prod_code,
                         batch=row['batch'],
+                        ctn=row['qty'],
                         qty=row['qty'],
                         branch_id=1,
                         trns=row['trns'],
-                        veh=row['veh'],
+                        veh=row['veh'], 
                         
                         remarks="Product code not found"
                     )
@@ -596,7 +659,7 @@ def asn_view(request):
             asn_no=asn_no,
             prod_id=product,
             batch=batch,
-            qty=qty,
+            ctn=qty,
             branch_id=1,
             remarks="Added manually"
         )
@@ -641,6 +704,7 @@ def updateasn(request, id):
         pod3.asn_no = request.POST.get('asn_no')
         pod3.prod_id = request.POST.get('prod_id')
         pod3.qty = request.POST.get('qty')
+        pod3.ctn = request.POST.get('qty')
         pod3.batch = request.POST.get('batch')
         
         # Handle file upload
@@ -1037,70 +1101,67 @@ def editlocation(request, id):
     }
     return render(request, 'editlocation.html', context)
 
+import traceback
+
 @login_required
 def UpdateLocation(request, id):
-    # Get stockin record
-    pod = get_object_or_404(stockin, id=id)
+    try:
+        pod = get_object_or_404(stockin, id=id)
 
-    if request.method == "POST":
-        location_name = request.POST.get('location')
-        status = request.POST.get('status')  # Default Good if not sent
-        rec_qty = Decimal(request.POST.get('recqty', '0.00'))
+        if request.method == "POST":
+            location_name = request.POST.get('location', '').strip().lower()
+            status = request.POST.get('status', 'Good')
+            spid = request.POST.get('spid')
+            rec_qty = Decimal(request.POST.get('recqty', '0.00'))
 
-        # 🔎 1️⃣ Check if received qty exceeds stockin quantity
-        if rec_qty > pod.qty:
-            messages.error(request, "Location quantity cannot be greater than received quantity!")
-            return redirect('editlocation', id=id)
+            if rec_qty > (pod.qty or Decimal('0.00')):
+                messages.error(request, "Qty exceeded!")
+                return redirect('editlocation', id=id)
 
-        # ✅ 2️⃣ Update stockin date & time
-        current_datetime = datetime.now()
-        pod.rec_dat = current_datetime.date()
-        pod.rec_tim = current_datetime.time().replace(microsecond=0)
+            pod.location = Decimal(pod.location or 0) + rec_qty
+            pod.save()
 
-        # 🔎 3️⃣ Add received qty to stockin.location
-        pod.location = (pod.location or Decimal('0.00')) + rec_qty
-        pod.save()
-
-        # 🔎 4️⃣ Check if same location record already exists
-        existing = Location.objects.filter(
-            stockin=pod,
-            prod_id=pod.prod_id,
-            batch_id=pod.batch,
-            expiry_dat=pod.expiry,
-            location_name=location_name
-        ).first()
-
-        # 🔎 5️⃣ Update existing or create new record based on status
-        if existing:
-            if status == "Damage":
-                existing.block_stock += rec_qty
-            else:
-                existing.blc += rec_qty
-            existing.save()
-            messages.success(request, f'Stock updated successfully! New balance: Good={existing.blc}, Damage={existing.block_stock}')
-        else:
-            Location.objects.create(
+            existing = Location.objects.filter(
                 stockin=pod,
                 prod_id=pod.prod_id,
                 batch_id=pod.batch,
-                location_name=location_name,
-                mfg_dat=pod.mfg,
                 expiry_dat=pod.expiry,
-                blc=rec_qty if status != "Damage" else Decimal('0.00'),
-                block_stock=rec_qty if status == "Damage" else Decimal('0.00')
-            )
-            messages.success(request, 'Stock placed in location successfully!')
+                location_name__iexact=location_name
+            ).first()
 
-        # ✅ 6️⃣ Check if fully received
-        if pod.location == pod.qty:
-            messages.success(request, "All items received successfully!")
-            return redirect('/addlocation/')
+            if existing:
+                existing.blc = Decimal(existing.blc or 0)
+                existing.block_stock = Decimal(existing.block_stock or 0)
+                existing.sup_id = spid  # ✅ update supplier
+                if status == "Damage":
+                    existing.block_stock += rec_qty
+                else:
+                    existing.blc += rec_qty
+
+                existing.save()
+
+            else:
+                Location.objects.create(
+                    stockin=pod,
+                    prod_id=pod.prod_id,
+                    sup_id=spid,  # ✅ added
+                    batch_id=pod.batch,
+                    location_name=location_name,
+                    mfg_dat=pod.mfg,
+                    expiry_dat=pod.expiry,
+                    blc=rec_qty if status != "Damage" else Decimal('0.00'),
+                    block_stock=rec_qty if status == "Damage" else Decimal('0.00')
+                )
+
+            return redirect('editlocation', id=id)
 
         return redirect('editlocation', id=id)
 
-    # GET request fallback
-    return redirect('editlocation', id=id)
-    
+    except Exception as e:
+        print("ERROR:", str(e))
+        print(traceback.format_exc())
+        messages.error(request, f"Error: {str(e)}")
+        return redirect('editlocation', id=id)
 #D.N 
 @login_required
 def dn_load(request):
@@ -1657,3 +1718,52 @@ def test_messages(request):
         return render(request, 'test_messages.html')  # render same page to show messages
 
     return render(request, 'test_messages.html')
+    
+# Reports New
+
+
+from django.db.models import Sum
+
+from django.db.models import Sum, Subquery, OuterRef
+
+def index_stock(request):
+    suppliers = supplier.objects.all().order_by('sup_name')
+    sup_id = request.GET.get('sup_id')
+
+    stock_data = []
+
+    if sup_id:
+        try:
+            sup_id = int(sup_id)
+        except:
+            sup_id = None
+
+        if sup_id:
+            stock_data = (
+                Location.objects
+                .filter(sup_id=sup_id)
+                .annotate(
+                    prod_name=Subquery(
+                        product.objects
+                        .filter(prod_desc=OuterRef('prod_id'))  # ✅ relation
+                        .values('prod_name')[:1]                # ✅ GET NAME
+                    )
+                )
+                .values(
+                    'location_name',
+                    'prod_id',
+                    'prod_name',
+                    'batch_id'
+                )
+                .annotate(
+                    total_good=Sum('blc'),
+                    total_damage=Sum('block_stock')
+                )
+                .order_by('location_name')
+            )
+
+    return render(request, 'index_stock.html', {
+        'suppliers': suppliers,
+        'stock_data': stock_data,
+        'selected_supplier': sup_id
+    })
